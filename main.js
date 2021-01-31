@@ -9,12 +9,11 @@ const pathCharacter = '*';
 class Field {
     constructor(field) {
         this.field = field;
-        this.outerIndex = Math.floor(Math.random() * this.field.length);
-        this.innerIndex = Math.floor(Math.random() * this.field[0].length);
-        while (this.field[this.outerIndex][this.innerIndex] === hat) {
+        do {
             this.outerIndex = Math.floor(Math.random() * this.field.length);
             this.innerIndex = Math.floor(Math.random() * this.field[0].length);
         }
+        while (this.field[this.outerIndex][this.innerIndex] === hat)
         this.field[this.outerIndex][this.innerIndex] = pathCharacter;
         this.won = false;
         this.loss = false;
@@ -24,13 +23,34 @@ class Field {
     }
 
     print() {
-        this.field.forEach(el => console.log(el.join('')));
+        for (let y = 0; y < this.field.length; y++) {
+            for (let x = 0; x < this.field[0].length; x++) {
+                if (y === this.outerIndex && x === this.innerIndex) {
+                    term.blue.bold(pathCharacter)
+                }
+                else if (this.field[y][x] === pathCharacter) {
+                    term.blue.bold(pathCharacter);
+                }
+                else if (this.field[y][x] === hole) {
+                    term.red.bold(hole);
+                }
+                else if (this.field[y][x] === hat) {
+                    term.noFormat(hat);
+                }
+                else {
+                    term.green.bold(fieldCharacter);
+                }
+            }
+            console.log('');
+        }
     }
 
     playGame() {
         while (!this.won && !this.loss) {
+            console.clear();
+            this.scoreboard();
             this.print();
-            let direction = prompt(term.bold('Which way? ').magenta.bold('(d = Down, ').blue.bold('u = Up, ').green.bold('l = left, ').yellow.bold('r = right): ')).toLowerCase();
+            let direction = prompt(term.bold('Which way? ').magenta.bold('(d = down, ').blue.bold('u = up, ').green.bold('l = left, ').yellow.bold('r = right): ')).toLowerCase();
         
             if (direction === 'l') {
                 this.innerIndex--;
@@ -45,7 +65,7 @@ class Field {
                 this.outerIndex++;
             }
             else {
-                term.yellow.bold('Please enter d, u, l or r: \n');
+                term.yellow.bold('Enter d, u, l or r: \n');
             }
             if (this.innerIndex < 0 || this.innerIndex > this.field[0].length - 1 || this.outerIndex < 0 || this.outerIndex > this.field.length - 1) {
                 term.red.bold('You went out of bounds! Sorry, you lost the game :(\n');
@@ -56,49 +76,46 @@ class Field {
                 this.loss = true;
             }
             else if (this.field[this.outerIndex][this.innerIndex] === hat) {
+                console.clear();
                 term.green.bold('You found your hat! Congrats, you won the game :)\n');
-                this.won = true;
                 this.score++;
                 this.level++;
+                this.scoreboard();
+                this.won = true;
                 this.switchMode();
                 this.nextLevel();
             }
             else {
+                this.score++;
                 this.field[this.outerIndex][this.innerIndex] = pathCharacter;
-                if (this.mode === 'Hard') {
-                    let randOuterIdx = Math.floor(Math.random() * this.field.length);
-                    let randInnerIdx = Math.floor(Math.random() * this.field[0].length);
-                    while (this.field[randOuterIdx][randInnerIdx] !== fieldCharacter) {
+                if (this.mode === 'Hard' && this.score % 3 === 0) {
+                    let randOuterIdx;
+                    let randInnerIdx;
+                    do {
                         randOuterIdx = Math.floor(Math.random() * this.field.length);
                         randInnerIdx = Math.floor(Math.random() * this.field[0].length);
                     }
+                    while (this.field[randOuterIdx][randInnerIdx] !== fieldCharacter)
                     this.field[randOuterIdx][randInnerIdx] = hole;
                 }
-                this.score++;
             }
         }
     }
 
     nextLevel() {
-        this.scoreboard();
-        let response = prompt(term.bold('Next level? ').yellow.bold('(Y = Yes): \n')).toLowerCase();
-
-        if (response === 'y') {
-            this.won = false;
-            this.loss = false;
+        this.won = false;
+        this.loss = false;
+        do {
             this.outerIndex = Math.floor(Math.random() * this.field.length);
             this.innerIndex = Math.floor(Math.random() * this.field[0].length);
-            while (this.field[this.outerIndex][this.innerIndex] === hat) {
-                this.outerIndex = Math.floor(Math.random() * this.field.length);
-                this.innerIndex = Math.floor(Math.random() * this.field[0].length);
-            }
-            this.field = Field.generateField(this.level, this.level);
-            while(!this.solvable(this.field)) {
-                this.field = Field.generateField(this.level, this.level);
-            }
-            this.field[this.outerIndex][this.innerIndex] = pathCharacter;
-            this.playGame();
         }
+        while (this.field[this.outerIndex][this.innerIndex] === hat)
+        do {
+            this.field = Field.generateField(this.level, this.level);
+        }
+        while(!this.solvable(this.field))
+        this.field[this.outerIndex][this.innerIndex] = pathCharacter;
+        this.playGame();
     }
 
     scoreboard() {
@@ -106,7 +123,7 @@ class Field {
     }
 
     switchMode() {
-        let response = prompt(term.bold('Switch mode? ').cyan.bold('(Y = Yes): \n')).toLowerCase();
+        let response = prompt(term.bold('Switch mode? ').cyan.bold('(Y = Yes or any other key for No) \n')).toLowerCase();
 
         if (response === 'y') {
             this.mode === 'Hard' ? this.mode = 'Easy' : this.mode = 'Hard';
@@ -125,6 +142,7 @@ class Field {
         let foundHat = false;
         let queue = [currPosition];
         let visited = [currPosition];
+
         while (queue.length > 0) {
             let node = queue.shift();
             for (let d = 0; d < directions.length; d++){
@@ -153,8 +171,7 @@ class Field {
         height += 3;
         width += 3;
         let newField = [];
-        let hatOuterIndex;
-        let hatInnerIndex;
+
         function randomRow() {
             let row = [];
             const fieldComponents = [hole, fieldCharacter];
@@ -164,6 +181,7 @@ class Field {
             }
             return row;
         }
+
         function addRow() {
             let newRow = randomRow();
             let percentOfHoles = newRow.filter(el => el === hole).length / newRow.length;
@@ -175,16 +193,15 @@ class Field {
             }
             return newRow;
         }
+
         while (newField.length < height) {
             let rowElement = addRow();
             newField.push(rowElement);
         }
-        function addHat() {
-            hatOuterIndex = Math.floor(Math.random() * height);
-            hatInnerIndex = Math.floor(Math.random() * width);
-            newField[hatOuterIndex][hatInnerIndex] = hat;
-        }
-        addHat();
+
+        let hatOuterIndex = Math.floor(Math.random() * height);
+        let hatInnerIndex = Math.floor(Math.random() * width);
+        newField[hatOuterIndex][hatInnerIndex] = hat;
         return newField;
     }
 }
