@@ -86,12 +86,15 @@ class Field {
         if (response === 'y') {
             this.won = false;
             this.loss = false;
-            this.field = Field.generateField(this.level, this.level);
             this.outerIndex = Math.floor(Math.random() * this.field.length);
             this.innerIndex = Math.floor(Math.random() * this.field[0].length);
             while (this.field[this.outerIndex][this.innerIndex] === hat) {
                 this.outerIndex = Math.floor(Math.random() * this.field.length);
                 this.innerIndex = Math.floor(Math.random() * this.field[0].length);
+            }
+            this.field = Field.generateField(this.level, this.level);
+            while(!this.solvable(this.field)) {
+                this.field = Field.generateField(this.level, this.level);
             }
             this.field[this.outerIndex][this.innerIndex] = pathCharacter;
             this.playGame();
@@ -110,67 +113,40 @@ class Field {
         }
     }
 
-    mazeSolver(field) {
-        const holes = [];
-        const fieldChars = [];
-        let currOuterIdx = this.outerIndex;
-        let currInnerIdx = this.innerIndex;
-        let currPosition = [currOuterIdx, currInnerIdx];
-        let hatPosition;
-        let hatFound = false;
-        let left = [0, -1];
-        let right = [0, 1];
-        let up = [-1, 0];
-        let down = [1, 0];
+    solvable(field) {
+        const currOuterIdx = this.outerIndex;
+        const currInnerIdx = this.innerIndex;
+        const currPosition = [currOuterIdx, currInnerIdx];
+        const left = [0, -1];
+        const right = [0, 1];
+        const up = [-1, 0];
+        const down = [1, 0];
         const directions = [left, right, up, down];
+        let foundHat = false;
         let queue = [currPosition];
         let visited = [currPosition];
-        for (let y = 0; y < field.length; y++) {
-            for (let x = 0; x < field[0].length; x++) {
-                if (field[y][x] === hole) {
-                    holes.push([y, x]);
-                }
-                else if (field[y][x] === fieldCharacter) {
-                    fieldChars.push([y, x]);
-                }
-                else if (field[y][x] === hat) {
-                    hatPosition = [y, x];
-                }
-            }
-        }
         while (queue.length > 0) {
             let node = queue.shift();
-            //console.log(node);
             for (let d = 0; d < directions.length; d++){
                 let i = node[0];
                 let j = node[1];
-                console.log(i, j);
                 if (i + directions[d][0] >= 0 && i + directions[d][0] <= field.length - 1) {
                     i += directions[d][0];
-                    //console.log(i);
                 }
                 if (j + directions[d][1] >= 0 && j + directions[d][1] <= field[0].length - 1) {
                     j += directions[d][1];
-                    //console.log(j);
                 }
                 if (!visited.some(el => el[0] === i && el[1] === j) && field[i][j] !== hole) {
                     queue.push([i, j]);
-                    //console.log(queue);
                     visited.push([i, j]);
-                    //console.log(visited);
                 }
                 if (field[i][j] === hat) {
-                    hatFound = true;
+                    foundHat = true;
                     queue.length = 0;
                 }
             }
         }
-        console.log(holes);
-        console.log(fieldChars);
-        console.log(hatPosition);
-        console.log(currPosition);
-        console.log(queue);
-        console.log(visited);
+        return foundHat;
     }
 
     static generateField(height, width, percentage = 0.3) {
@@ -209,20 +185,13 @@ class Field {
             newField[hatOuterIndex][hatInnerIndex] = hat;
         }
         addHat();
-        console.log(newField);
         return newField;
     }
 }
 
-//const newGame = new Field(Field.generateField(0, 0));
-//newGame.playGame();
-const myField = new Field([
-    [ '░', 'O', '░' ],
-    [ '░', '░', '^' ],
-    [ 'O', '░', '░' ]
-]);
-myField.mazeSolver([
-    [ '░', 'O', '░' ],
-    [ '░', '░', '^' ],
-    [ 'O', '░', '░' ]
-]);
+const gameField = Field.generateField(0, 0);
+const newGame = new Field(gameField);
+while(!newGame.solvable(gameField)) {
+    newGame.field = gameField;
+}
+newGame.playGame();
