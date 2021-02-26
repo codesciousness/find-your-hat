@@ -33,6 +33,7 @@ Additionally, I chose to implement a few project extensions which are as follows
 This project was created with:
 
 - JavaScript ES6
+- Node.js version: 14.15.1
 - Prompt-sync version: 4.2.0
 - Terminal Kit version: 1.45.9
 
@@ -40,6 +41,7 @@ This project was created with:
 
 ![Find Your Hat Screen Recording](resources/images/find-your-hat-screen-recording.gif)
 ![Project Image 1](resources/images/project-image-1.jpg)
+![Project Image 2](resources/images/project-image-2.jpg)
 
 ## Status
 

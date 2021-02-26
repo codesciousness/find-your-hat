@@ -17,7 +17,7 @@ class Field {
         this.field[this.outerIndex][this.innerIndex] = pathCharacter;
         this.won = false;
         this.loss = false;
-        this.level = 0;
+        this.level = 1;
         this.score = 0;
         this.mode = 'Easy';
     }
@@ -113,7 +113,7 @@ class Field {
         do {
             this.field = Field.generateField(this.level, this.level);
         }
-        while(!this.solvable(this.field))
+        while(!this.solvable(this.field) || this.field[this.outerIndex][this.innerIndex] === hat)
         this.field[this.outerIndex][this.innerIndex] = pathCharacter;
         this.playGame();
     }
